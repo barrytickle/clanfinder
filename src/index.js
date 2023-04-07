@@ -5,27 +5,28 @@ let allCount = [];
 
 
 
+
+
 const getClans = async () => {
     // const clanURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRXM-ulyWgRCoURaqhs4s8_48D5m9vfUCFmqpOeZA6ZgH2kSLnEP-IIqbj9Z-6fHCgafc8skv5vj8hC/pub?gid=0&single=true&output=csv';
 
    try {
-    const clanURL = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vRXM-ulyWgRCoURaqhs4s8_48D5m9vfUCFmqpOeZA6ZgH2kSLnEP-IIqbj9Z-6fHCgafc8skv5vj8hC/pubhtml?gid=0&single=true');
+    const clanURL = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vRXM-ulyWgRCoURaqhs4s8_48D5m9vfUCFmqpOeZA6ZgH2kSLnEP-IIqbj9Z-6fHCgafc8skv5vj8hC/pub?output=csv');
 
     const res = await fetch(clanURL);
     const text = await res.text();
-    const parser = new DOMParser();
-    const html = parser.parseFromString(text, "text/html");
-    const links = html.querySelectorAll('tr a')
-    if(!links.length) return;
 
-    links.forEach(l => {
-        clans.push(l.textContent);
+    const split = (text.trim().split('groupid='));
+
+
+    split.forEach(s => {
+        const match = s.match(/\d{3,9}/g);
+        if(!!!match) return;
+        clans.push({
+            url: match[0],
+        });
+        // clans.push(match[0]);
     });
-
-
-    console.log('clans', clans);
-
-    // console.log(html);
    } catch (error) {
     console.log(error);
    }
@@ -34,33 +35,45 @@ const getClans = async () => {
 
 
 let lowValue = 'text';
-const clanFinder =async (url, ind) => {
+let attempts = 0;
+const populateClans = async(clan, ind) => {
+try {
+    const newURL = `https://www.bungie.net/Platform/GroupV2/${clan.url}`;
+    const res = await fetch(newURL, {
+        method:'GET',
+        headers: {
+            'X-API-Key': '02199866e269443887e47a0bf44aabd8',
+        }
+    });
+    const text = await res.text();
+    const json = JSON.parse(text);
+
+    if(!json.Response.detail === undefined) return;
+    const {detail} = json.Response;
+
+    const {memberCount} = detail;
+
+    if((lowValue.number > memberCount) || attempts === 0){
+        lowValue = {ind: ind, number: memberCount, name: detail.name};
+    }
+
+
+
+
+
+
+    if(attempts === clans.length -1) window.dispatchEvent(new Event('parse-complete'));
+
+    attempts++;
+} catch (error) {
+    console.log(error);
+}
+};
+const clanFinder = async (url, ind) => {
         try {
+           
 
-            const newURL = 'https://corsproxy.io/?' + encodeURIComponent(url);
-
-            const res = await fetch(newURL);
-            const text = await res.text();
-            const parser = new DOMParser();
-            const html = parser.parseFromString(text, "text/html");
-            
-            const count = html.querySelector(".membercount");
-                
-            const number = count.textContent.match(/\d{1,2}/);
-
-
-            if(number.length === 0) return;
-
-            allCount.push({
-                ind: ind, 
-                value: Number(number[0])
-            });
-            
-            if((ind !== 0 && lowValue > Number(number[0])) || ind === 0){   
-                    lowValue = ind;
-            }
-
-            if(ind === clans.length -1) window.dispatchEvent(new Event('parse-finish'));
+            return true;
          
         } catch (e) {
           console.warn(e);
@@ -68,15 +81,27 @@ const clanFinder =async (url, ind) => {
 }
 
 
+const parseClans = async () => {
+    // console.log('clans', clans);
+}
+
 (async () => {
 
-    await getClans();
-    clans.forEach(clanFinder);
 
-    window.addEventListener('parse-finish', function(){
-        window.location.href = clans[lowValue];
-        // console.log(lowValue, allCount);
+    const {href} = window.location;
+
+    if(!href.includes('localhost:3000') && !href.includes('directactionclan') && !href.includes('barrytickle-vercel'))return;
+
+    await getClans();
+    clans.forEach(populateClans);  
+
+    window.addEventListener('parse-complete', function(){
+        console.log('lowValue', lowValue);
+        const url = `https://www.bungie.net/en/ClanV2?groupid=${clans[lowValue.ind].url}`
+        console.log(`https://www.bungie.net/en/ClanV2?groupid=${clans[lowValue.ind].url}`);
+        window.location.href = url;
     });
+
 })()
 
 
