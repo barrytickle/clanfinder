@@ -1,15 +1,7 @@
-// import fetch from 'node-fetch';
-
 const clans = [];
 let allCount = [];
 
-
-
-
-
 const getClans = async () => {
-    // const clanURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRXM-ulyWgRCoURaqhs4s8_48D5m9vfUCFmqpOeZA6ZgH2kSLnEP-IIqbj9Z-6fHCgafc8skv5vj8hC/pub?gid=0&single=true&output=csv';
-
    try {
     const clanURL = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vRXM-ulyWgRCoURaqhs4s8_48D5m9vfUCFmqpOeZA6ZgH2kSLnEP-IIqbj9Z-6fHCgafc8skv5vj8hC/pub?output=csv');
 
@@ -25,6 +17,8 @@ const getClans = async () => {
         clans.push({
             url: match[0],
         });
+
+  
         // clans.push(match[0]);
     });
    } catch (error) {
@@ -53,14 +47,17 @@ try {
 
     const {memberCount} = detail;
 
+    // console.log('Detail', detail);
+
     if((lowValue.number > memberCount) || attempts === 0){
         lowValue = {ind: ind, number: memberCount, name: detail.name};
     }
 
-
-
-
-
+    allCount.push({
+        name: detail.name,
+        members: memberCount,
+        url: newURL
+    });
 
     if(attempts === clans.length -1) window.dispatchEvent(new Event('parse-complete'));
 
@@ -69,26 +66,13 @@ try {
     console.log(error);
 }
 };
-const clanFinder = async (url, ind) => {
-        try {
-           
 
-            return true;
-         
-        } catch (e) {
-          console.warn(e);
-        }
-}
-
-
-const parseClans = async () => {
-    // console.log('clans', clans);
-}
 
 (async () => {
-
-
     const {href} = window.location;
+    const {hash} = window.location;
+
+    // console.log(window.location.hash,window.location);
 
     if(!href.includes('localhost:3000') && !href.includes('directactionclan') && !href.includes('barrytickle.vercel'))return;
 
@@ -96,13 +80,17 @@ const parseClans = async () => {
     clans.forEach(populateClans);  
 
     window.addEventListener('parse-complete', function(){
-        console.log('lowValue', lowValue);
+        // console.log('lowValue', lowValue);
         const url = `https://www.bungie.net/en/ClanV2?groupid=${clans[lowValue.ind].url}`
-        console.log(`https://www.bungie.net/en/ClanV2?groupid=${clans[lowValue.ind].url}`);
-        window.location.href = url;
+        // console.log(`https://www.bungie.net/en/ClanV2?groupid=${clans[lowValue.ind].url}`);
+
+
+        console.log(allCount);
+        
+        // console.log()
+        if(hash === ""){
+            window.location.href = url;
+        } 
     });
 
 })()
-
-
-
