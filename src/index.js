@@ -90,7 +90,7 @@ const parseClans = async () => {
 
     const {href} = window.location;
 
-    if(!href.includes('localhost:3000') && !href.includes('directactionclan') && !href.includes('barrytickle-vercel'))return;
+    if(!href.includes('localhost:3000') && !href.includes('directactionclan') && !href.includes('barrytickle.vercel'))return;
 
     await getClans();
     clans.forEach(populateClans);  
