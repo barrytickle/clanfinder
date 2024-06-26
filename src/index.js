@@ -1,5 +1,12 @@
-const clans = [];
+let clans = [];
 let allCount = [];
+
+let template = "";
+
+const generateTemplate = (text) => {
+	template = text.replace(/\d{3,8}/g, "<number>");
+	console.log(template);
+};
 
 const getClans = async () => {
 	try {
@@ -12,17 +19,22 @@ const getClans = async () => {
 		const res = await fetch(clanURL);
 		const text = await res.text();
 
-		const split = text.trim().split("Profile/");
+		console.log(text);
 
-		split.forEach((s) => {
-			const match = s.match(/\d{3,9}/g);
-			if (!!!match) return;
-			clans.push({
-				url: match[0],
-			});
+		const regex = /\/(\d+)$/gm; // Matches the last sequence of digits after the last slash
+		const matches = [...text.trim().matchAll(regex)];
 
-			// clans.push(match[0]);
+		const templateMatch = text.trim().match(/^.*$/m)[0];
+
+		if (templateMatch.trim() !== " ") generateTemplate(templateMatch);
+
+		clans = matches.map((match) => {
+			return { url: match[1] };
 		});
+
+		console.log("Clans", clans);
+
+		// clans.push({ url: match[1] });
 	} catch (error) {
 		console.log(error);
 	}
@@ -86,14 +98,9 @@ const populateClans = async (clan, ind) => {
 
 	window.addEventListener("parse-complete", function () {
 		// console.log('lowValue', lowValue);
-		const url = `https://www.bungie.net/7/en/Clan/Profile/${
-			clans[lowValue.ind].url
-		}`;
-		// console.log(`https://www.bungie.net/en/ClanV2?groupid=${clans[lowValue.ind].url}`);
 
-		console.log(allCount);
+		const url = template.replace("<number>", clans[lowValue.ind].url);
 
-		// console.log()
 		if (hash === "") {
 			window.location.href = url;
 		}
