@@ -4,8 +4,9 @@
   "private": true,
   "dependencies": {
     "node-fetch": "^3.3.1",
-    "p5": "^0.6.0",
-    "react-scripts": "^2.0.0-next"
+    "p5": "^1.9.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "react-scripts": "^5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
