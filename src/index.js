@@ -91,7 +91,7 @@ const populateClans = async (clan, ind) => {
 	if (
 		!href.includes("localhost:3000") &&
 		!href.includes("directactionclan") &&
-		!href.includes("barrytickle.vercel")
+		!href.includes("clanfinder")
 	)
 		return;
 
