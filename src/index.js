@@ -11,11 +11,13 @@ const generateTemplate = (text) => {
 const getClans = async () => {
 	try {
 		const clanURL =
-			"https://corsproxy.io/?" +
+			"https://corsproxy.io/?url=" +
 			encodeURIComponent(
 				"https://docs.google.com/spreadsheets/d/e/2PACX-1vRXM-ulyWgRCoURaqhs4s8_48D5m9vfUCFmqpOeZA6ZgH2kSLnEP-IIqbj9Z-6fHCgafc8skv5vj8hC/pub?output=csv"
 			);
 
+
+			console.log(clanURL);
 		const res = await fetch(clanURL);
 		const text = await res.text();
 
